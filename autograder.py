@@ -7,8 +7,19 @@ import matplotlib.pyplot as plt
 from genHTML import gen
 
 
+def check_bomb(server, VMList, serverDict, VMDict, serverIDMap, VMIDMap):
+    serverCPU, serverMEM = serverDict[serverIDMap[server]]['cpu'], serverDict[serverIDMap[server]]['memory']
+    for VM in VMList:
+        serverCPU -= VMDict[VMIDMap[VM]]['cpu']
+        serverMEM -= VMDict[VMIDMap[VM]]['memory']
+        if serverCPU < 0 or serverMEM < 0:
+            return False
+    return True
+
+
 def grader(testCmd, ioData):
     serverDict = {}
+    VMDict = {}
     with open(ioData) as file:
         serverNums = eval(file.readline())
         for i in range(serverNums):
@@ -17,9 +28,12 @@ def grader(testCmd, ioData):
                                        'memory': eval(_mem),
                                        'hardCost': eval(_hardCost),
                                        'energyCost': eval(_energyCost)}})
-        _ = eval(file.readline())
-        for i in range(_):
-            file.readline()
+        VMNums = eval(file.readline())
+        for i in range(VMNums):
+            _type, _cpus, _mem, doubleNode = file.readline()[1:-2].split(',')
+            VMDict.update({_type: {'cpu': eval(_cpus),
+                                   'memory': eval(_mem),
+                                   'double': eval(doubleNode)}})
         days = eval(file.readline())
         operateInfo = []
         for i in range(days):
@@ -29,9 +43,10 @@ def grader(testCmd, ioData):
                 tmp = file.readline().strip()[1:-1]
                 if tmp[:3] == 'add':
                     _op, _, _id = tmp.split(',')
+                    dayOperateInfo['operate'].append((_op, eval(_id), _))
                 else:
                     _op, _id = tmp.split(',')
-                dayOperateInfo['operate'].append((_op, eval(_id)))
+                    dayOperateInfo['operate'].append((_op, eval(_id)))
             operateInfo.append(dayOperateInfo)
 
     beginTime = time.perf_counter()
@@ -81,8 +96,10 @@ def grader(testCmd, ioData):
     IDInd = 0
     dayServerInfo = {}
     VMIDMap = {}
+    VMIDTypeMap = {}
     migTot = 0
     migHappenTime = []
+    bombInfo = []
     for day_i in range(len(fullInfo)):
         day = fullInfo[day_i]
         for server in day['purchase']:
@@ -99,12 +116,18 @@ def grader(testCmd, ioData):
             dayServerInfo[target].append(source)
             VMIDMap[source] = target
             migTot += 1
+            if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
+                bombInfo.append(('Migration', day_i, cnt - 1))
         migHappenTime.append(cnt)
         opInd = 0
         for op in day['operate']:
             if op[0] == 'add':
                 dayServerInfo[day['request'][opInd][0]].append(op[1])
                 VMIDMap[op[1]] = day['request'][opInd][0]
+                VMIDTypeMap[op[1]] = op[2].strip()
+                if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict, VMDict,
+                                  serverIDMap, VMIDTypeMap):
+                    bombInfo.append(('Add', day_i, opInd))
                 opInd += 1
             else:
                 try:
@@ -173,7 +196,7 @@ def grader(testCmd, ioData):
     plt.clf()
 
     return os.path.split(ioData)[-1], hardCost, sum(energyCost), endTime - beginTime, sum(emptyRate) / len(
-        emptyRate), sum(energyCost) / len(energyCost), folderName, migTot
+        emptyRate), sum(energyCost) / len(energyCost), folderName, migTot, bombInfo
 
 
 if __name__ == '__main__':
@@ -201,6 +224,6 @@ if __name__ == '__main__':
                 raise ValueError('unsupport language')
             _ = grader(testCmd, d)
             l.append(_)
-    gen(l)
+    res = gen(l)
 
-    os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')))
+    os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))

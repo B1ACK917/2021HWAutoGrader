@@ -1,8 +1,9 @@
 import os
+import time
 
 contain = """
     <li>
-          <h2>******</h2>
+          <h2>******  <img src="./resource/icon-@@@@@.png" width="40"></h2>
           <div>
             <table align="center">
               <tr>
@@ -50,12 +51,34 @@ contain = """
               </tr>
             </table>
           </div>
+          BOMBINFO
         </li>
+"""
+
+bombContain = """
+          <div align="center">
+            <table border="1">
+              <tr>
+                <th>错误类型</th>
+                <th>错误信息</th>
+              </tr>
+              BOMBINNER
+            </table>
+          </div>
+"""
+
+bombStyle = """
+              <tr>
+                <td>*****</td>
+                <td>@@@@@</td>
+              </tr>
 """
 
 
 def gen(ls):
-    with open('index.html', 'w', encoding='utf-8') as out:
+    timeFormat = '%m_%d_%H_%M_%S'
+    htmlName = time.strftime(timeFormat, time.localtime(time.time())) + '.html'
+    with open(htmlName, 'w', encoding='utf-8') as out:
         with open('meta', encoding='utf-8') as file:
             line = file.readline()
             while line:
@@ -63,7 +86,7 @@ def gen(ls):
                     out.write(line)
 
                 else:
-                    for (ioName, hardCost, energyCost, timeCost, emptyRate, energyAVG, folder, mig) in ls:
+                    for (ioName, hardCost, energyCost, timeCost, emptyRate, energyAVG, folder, mig, bombInfo) in ls:
                         cs = contain.split('\n')
                         i = -1
                         while i < len(cs):
@@ -71,7 +94,10 @@ def gen(ls):
                             if '******' not in cs[i]:
                                 out.write(cs[i] + '\n')
                             else:
-                                out.write(cs[i].replace('******', ioName) + '\n')
+                                if not bombInfo:
+                                    out.write(cs[i].replace('******', ioName).replace('@@@@@', 'right') + '\n')
+                                else:
+                                    out.write(cs[i].replace('******', ioName).replace('@@@@@', 'warning') + '\n')
                                 break
                         while i < len(cs):
                             i += 1
@@ -150,10 +176,34 @@ def gen(ls):
                             else:
                                 out.write(cs[i].replace('******', str(mig) + '\n'))
                                 break
+
+                        if bombInfo:
+                            while i < len(cs):
+                                i += 1
+                                if 'BOMBINFO' not in cs[i]:
+                                    out.write(cs[i] + '\n')
+                                else:
+                                    j = -1
+                                    bc = bombContain.split('\n')
+                                    while j < len(bc) - 1:
+                                        j += 1
+                                        if 'BOMBINNER' not in bc[j]:
+                                            out.write(bc[j] + '\n')
+                                        else:
+                                            for b in bombInfo:
+                                                out.write(bombStyle.replace('*****', '资源分配溢出').replace('@@@@@',
+                                                                                                       '发生于第{}天的第{}条{}操作'.format(
+                                                                                                           b[1], b[2],
+                                                                                                           b[
+                                                                                                               0])) + '\n')
+                                    break
                         while i < len(cs) - 1:
                             i += 1
+                            if 'BOMBINFO' in cs[i]:
+                                continue
                             out.write(cs[i] + '\n')
                 line = file.readline()
+    return htmlName
 
 
 if __name__ == '__main__':
