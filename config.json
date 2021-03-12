@@ -1,0 +1,7 @@
+{
+  "language": "",
+  "pythonInterpreter": "",
+  "executable": "",
+  "sourceCode": "",
+  "ioData": ["./data/training-1.txt", "./data/training-2.txt"]
+}
