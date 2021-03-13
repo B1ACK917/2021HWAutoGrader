@@ -232,6 +232,6 @@ if __name__ == '__main__':
                 raise ValueError('unsupport language')
             _ = grader(testCmd, d)
             l.append(_)
-    res = gen(l)
+    res = gen(l, False)
 
     os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
