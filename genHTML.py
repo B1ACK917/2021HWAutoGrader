@@ -1,18 +1,22 @@
 import os
 import time
 
-contain = """
-    <li>
-          <h2>******  <img src="./resource/icon-@@@@@.png" width="40"></h2>
+header = """
+        <header>总计成本: CCCOST</header>
+"""
+
+mainContain = """
+        <li>
+          <h2>DOC_NAME  <img src="./resource/icon-ICON_TYPE.png" width="40"></h2>
           <div>
             <table align="center">
               <tr>
-                <td><img src="******" border="0" /></td>
-                <td><img src="******" border="0" /></td>
+                <td><img src="IMG1" border="0" /></td>
+                <td><img src="IMG2" border="0" /></td>
               </tr>
               <tr>
-                <td><img src="******" border="0" /></td>
-                <td><img src="******" border="0" /></td>
+                <td><img src="IMG3" border="0" /></td>
+                <td><img src="IMG4" border="0" /></td>
               </tr>
             </table>
           </div>
@@ -24,30 +28,30 @@ contain = """
               </tr>
               <tr>
                 <td>总成本</td>
-                <td>******</td>
+                <td>TOTAL_COST</td>
               </tr>
               <tr>
                 <td>运行时间</td>
-                <td>******</td>
+                <td>ELAPSED_TIME</td>
               </tr>
               <tr>
                 <td>硬件成本</td>
-                <td>******</td>
+                <td>HARD_COST</td>
               </tr>
               <tr>
                 <td>能源成本</td>
-                <td>******</td>
+                <td>ENERGY_COST</td>
               <tr>
                 <td>平均闲置率</td>
-                <td>******</td>
+                <td>EMPTY_RATIO</td>
               </tr>
               <tr>
                 <td>平均每日能源成本</td>
-                <td>******</td>
+                <td>ENERGY_AVG</td>
               </tr>
               <tr>
                 <td>总迁移次数</td>
-                <td>******</td>
+                <td>MIG_TIMES</td>
               </tr>
             </table>
           </div>
@@ -61,6 +65,9 @@ bombContain = """
               <tr>
                 <th>错误类型</th>
                 <th>错误信息</th>
+                <th>错误请求</th>
+                <th>错误服务器ID</th>
+                <th>挂载虚拟机列表(简略)</th>
               </tr>
               BOMBINNER
             </table>
@@ -69,13 +76,16 @@ bombContain = """
 
 bombStyle = """
               <tr>
-                <td>*****</td>
-                <td>@@@@@</td>
+                <td>BOMB_TYPE</td>
+                <td>BOMB_INFO</td>
+                <td>BOMB_REQ</td>
+                <td>BOMB_SERVER_ID</td>
+                <td>BOMB_SERVER_VM</td>
               </tr>
 """
 
 
-def gen(ls):
+def gen(ls, showHeader=True):
     timeFormat = '%m_%d_%H_%M_%S'
     htmlName = time.strftime(timeFormat, time.localtime(time.time())) + '.html'
     with open(htmlName, 'w', encoding='utf-8') as out:
@@ -84,127 +94,45 @@ def gen(ls):
             while line:
                 if '&&&&&&&&' not in line:
                     out.write(line)
-
                 else:
+                    existHeader = False
                     for (ioName, hardCost, energyCost, timeCost, emptyRate, energyAVG, folder, mig, bombInfo) in ls:
-                        cs = contain.split('\n')
-                        i = -1
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                if not bombInfo:
-                                    out.write(cs[i].replace('******', ioName).replace('@@@@@', 'right') + '\n')
-                                else:
-                                    out.write(cs[i].replace('******', ioName).replace('@@@@@', 'warning') + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', os.path.join(folder, '1.png')) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', os.path.join(folder, '2.png')) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', os.path.join(folder, '3.png')) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', os.path.join(folder, '4.png')) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(hardCost + energyCost)) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(round(timeCost, 4)) + 's') + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(hardCost)) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(energyCost)) + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(round(emptyRate, 6) * 100) + ' % ') + '\n')
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(energyAVG) + '\n'))
-                                break
-                        while i < len(cs):
-                            i += 1
-                            if '******' not in cs[i]:
-                                out.write(cs[i] + '\n')
-                            else:
-                                out.write(cs[i].replace('******', str(mig) + '\n'))
-                                break
-
+                        contain = mainContain
+                        if showHeader and not existHeader:
+                            contain = header.replace('CCCOST', str(sum([k[1] + k[2] for k in ls]))) + contain
+                            existHeader = True
+                        contain = contain.replace('DOC_NAME', ioName)
+                        contain = contain.replace('ICON_TYPE', 'right' if not bombInfo else 'warning')
+                        contain = contain.replace('IMG1', os.path.join(folder, '1.png'))
+                        contain = contain.replace('IMG2', os.path.join(folder, '2.png'))
+                        contain = contain.replace('IMG3', os.path.join(folder, '3.png'))
+                        contain = contain.replace('IMG4', os.path.join(folder, '4.png'))
+                        contain = contain.replace('TOTAL_COST', str(hardCost + energyCost))
+                        contain = contain.replace('ELAPSED_TIME', str(round(timeCost, 4)) + 's')
+                        contain = contain.replace('HARD_COST', str(hardCost))
+                        contain = contain.replace('ENERGY_COST', str(energyCost))
+                        contain = contain.replace('EMPTY_RATIO', str(round(emptyRate * 100, 6)) + ' % ')
+                        contain = contain.replace('ENERGY_AVG', str(energyAVG))
+                        contain = contain.replace('MIG_TIMES', str(mig))
                         if bombInfo:
-                            while i < len(cs):
-                                i += 1
-                                if 'BOMBINFO' not in cs[i]:
-                                    out.write(cs[i] + '\n')
-                                else:
-                                    j = -1
-                                    bc = bombContain.split('\n')
-                                    while j < len(bc) - 1:
-                                        j += 1
-                                        if 'BOMBINNER' not in bc[j]:
-                                            out.write(bc[j] + '\n')
-                                        else:
-                                            for b in bombInfo:
-                                                out.write(bombStyle.replace('*****', '资源分配溢出').replace('@@@@@',
-                                                                                                       '发生于第{}天的第{}条{}操作'.format(
-                                                                                                           b[1], b[2],
-                                                                                                           b[
-                                                                                                               0])) + '\n')
-                                    break
-                        while i < len(cs) - 1:
-                            i += 1
-                            if 'BOMBINFO' in cs[i]:
-                                continue
-                            out.write(cs[i] + '\n')
+                            totalBombInfo = """"""
+                            for b in bombInfo[:50 if len(bombInfo) > 50 else len(bombInfo)]:
+                                bs = bombStyle
+                                bs = bs.replace('BOMB_TYPE', '资源分配溢出')
+                                bs = bs.replace('BOMB_INFO', '发生于第{}天的第{}条{}操作'.format(b[1], b[2], b[0]))
+                                bs = bs.replace('BOMB_REQ', '({},{},{})'.format(b[3][0], b[3][2], b[3][1]))
+                                bs = bs.replace('BOMB_SERVER_ID', '{} ({},{})'.format(b[4], b[5], b[6]))
+                                bs = bs.replace('BOMB_SERVER_VM', '{}'.format(b[7]))
+                                totalBombInfo += bs
+                            bc = bombContain.replace('BOMBINNER', totalBombInfo)
+                            contain = contain.replace('BOMBINFO', bc)
+                        else:
+                            contain = contain.replace('BOMBINFO', '')
+                        for l in contain.split('\n'):
+                            out.write(l + '\n')
                 line = file.readline()
     return htmlName
 
 
 if __name__ == '__main__':
-    print(contain.split('\n'))
+    print(mainContain.split('\n'))

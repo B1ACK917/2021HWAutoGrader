@@ -117,7 +117,10 @@ def grader(testCmd, ioData):
             VMIDMap[source] = target
             migTot += 1
             if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
-                bombInfo.append(('Migration', day_i + 1))
+                bombInfo.append(
+                    ('Migration', day_i + 1, cnt, mig, target, serverIDMap[target], serverDict[serverIDMap[target]],
+                     dayServerInfo[target][-5 if len(
+                         dayServerInfo[target]) > 5 else -len(dayServerInfo[target]):]))
         migHappenTime.append(cnt)
         opInd = 0
         for op in day['operate']:
@@ -127,7 +130,12 @@ def grader(testCmd, ioData):
                 VMIDTypeMap[op[1]] = op[2].strip()
                 if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict, VMDict,
                                   serverIDMap, VMIDTypeMap):
-                    bombInfo.append(('Add', day_i + 1, opInd + 1))
+                    bombInfo.append(('Add', day_i + 1, opInd + 1, op, day['request'][opInd][0],
+                                     serverIDMap[day['request'][opInd][0]],
+                                     serverDict[serverIDMap[day['request'][opInd][0]]],
+                                     dayServerInfo[day['request'][opInd][0]][-5 if len(
+                                         dayServerInfo[day['request'][opInd][0]]) > 5 else -len(
+                                         dayServerInfo[day['request'][opInd][0]]):]))
                 opInd += 1
             else:
                 try:
