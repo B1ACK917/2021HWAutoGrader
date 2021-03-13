@@ -51,8 +51,8 @@ def grader(testCmd, ioData):
 
     beginTime = time.perf_counter()
     result = os.popen(testCmd)
-    endTime = time.perf_counter()
     result = result.read().split('\n')[:-1]
+    endTime = time.perf_counter()
     fullInfo = []
     for i in range(len(result)):
         if 'purchase' in result[i]:
@@ -232,6 +232,6 @@ if __name__ == '__main__':
                 raise ValueError('unsupport language')
             _ = grader(testCmd, d)
             l.append(_)
-    res = gen(l, False)
+    res = gen(l)
 
     os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))

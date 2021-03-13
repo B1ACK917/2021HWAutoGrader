@@ -85,7 +85,7 @@ bombStyle = """
 """
 
 
-def gen(ls, showHeader=True):
+def gen(ls, showHeader=False):
     timeFormat = '%m_%d_%H_%M_%S'
     htmlName = time.strftime(timeFormat, time.localtime(time.time())) + '.html'
     with open(htmlName, 'w', encoding='utf-8') as out:
