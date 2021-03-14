@@ -220,7 +220,8 @@ if __name__ == '__main__':
         javaPath = config['javaPath']
         javaClassFile = config['javaClass']
         ioDataList = config['ioData']
-        print('AutoGrader Running with args: {}'.format([language, pypyPath, exe, sourceCode,javaPath,javaClassFile, ioDataList]))
+        print('AutoGrader Running with args: {}'.format(
+            [language, pypyPath, exe, sourceCode, javaPath, javaClassFile, ioDataList]))
 
         for d in tqdm(ioDataList, ncols=40):
             if language == 'c' or language == 'c++':
@@ -231,13 +232,14 @@ if __name__ == '__main__':
                 else:
                     testCmd = 'python \"{}\"<\"{}\"'.format(pypyPath, sourceCode, d)
             elif language == 'java':
+                filePath, classPath = os.path.split(javaClassFile)
+                classPath = os.path.splitext(classPath)[0]
                 if javaPath:
-                    testCmd = '\"{}\" \"{}\"<\"{}\"'.format(javaPath, javaClassFile, d)
+                    testCmd = '\"{}\" -cp \"{}\" \"{}\"<\"{}\"'.format(javaPath, filePath, classPath, d)
                 else:
-                    testCmd = 'java \"{}\"<\"{}\"'.format(javaPath, javaClassFile, d)
+                    testCmd = 'java -cp \"{}\" \"{}\"<\"{}\"'.format(filePath, classPath, d)
             else:
                 raise ValueError('unsupport language')
-            print(testCmd)
             _ = grader(testCmd, d)
             l.append(_)
     res = gen(l)
