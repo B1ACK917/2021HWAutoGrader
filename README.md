@@ -31,11 +31,11 @@
    字段意义：
 
    - **language**：你所使用的语言，请从[c,c++,python,java]中选择一个填入。
-- **pythonInterpreter**：如果language为python，请指定python解释器路径，留空则为默认python解释器，建议使用pypy并指定路径而不是Cpython。
+   - **pythonInterpreter**：如果language为python，请指定python解释器路径，留空则为默认python解释器，建议使用pypy并指定路径而不是Cpython。
    - **executable**：如果language为c或c++，请给出编译后的可执行文件(exe)的路径。
-- **sourceCode**：如果language为python，请给出python脚本所在的路径。
+   - **sourceCode**：如果language为python，请给出python脚本所在的路径。
    - **javaPath**：如果language为java，请给出java路径，如果留空则为默认java。请在cmd中键入“java -version”来检查是否存在默认java解释器。
-- **javaClass**：如果language为java，请给出javaClass文件，也就是你已经用javac编译过的文件，如果不会编译请百度。
+   - **javaClass**：如果language为java，请给出javaClass文件，也就是你已经用javac编译过的文件，如果不会编译请百度。
    - **ioData**：输入文件，以列表形式存在，其中每一个字符串为一个输入文件。
 
 3. 
