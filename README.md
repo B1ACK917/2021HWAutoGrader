@@ -56,7 +56,9 @@
 
    **程序从标准输入输出获取信息，请不要重定向输入输出，仅在ioData字段中给出你想要输入到程序的文件路径即可**
 
-4. config编辑完成后，运行`autograder.py`，你可以选择使用IDE来运行或者直接在命令行中键入`python autograder.py`来运行
+4. config编辑完成后，在你clone下来的本文件夹中打开cmd并运行`pip install -r requirements.txt`来安装autoGrader需要的依赖。
+
+5. 运行`autograder.py`，你可以选择使用IDE来运行或者直接在命令行中键入`python autograder.py`来运行
 
 ### 结果实例
 
