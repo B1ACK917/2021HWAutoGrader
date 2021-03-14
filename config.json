@@ -3,5 +3,7 @@
   "pythonInterpreter": "",
   "executable": "",
   "sourceCode": "",
+  "javaPath": "",
+  "javaClass": "",
   "ioData": ["./data/training-1.txt", "./data/training-2.txt"]
 }

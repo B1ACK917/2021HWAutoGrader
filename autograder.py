@@ -165,7 +165,7 @@ def grader(testCmd, ioData):
             else:
                 empty += 1
         energyCost.append(c)
-        emptyRate.append(empty / (inUse + empty))
+        emptyRate.append((empty / (inUse + empty)) if inUse + empty else 0)
 
     timeFormat = '%m_%d_%H_%M_%S'
     folderName = os.path.join('./resource', time.strftime(timeFormat, time.localtime(time.time())))
@@ -217,8 +217,10 @@ if __name__ == '__main__':
         pypyPath = config['pythonInterpreter']
         exe = config['executable']
         sourceCode = config['sourceCode']
+        javaPath = config['javaPath']
+        javaClassFile = config['javaClass']
         ioDataList = config['ioData']
-        print('AutoGrader Running with args: {}'.format([language, pypyPath, exe, sourceCode, ioDataList]))
+        print('AutoGrader Running with args: {}'.format([language, pypyPath, exe, sourceCode,javaPath,javaClassFile, ioDataList]))
 
         for d in tqdm(ioDataList, ncols=40):
             if language == 'c' or language == 'c++':
@@ -228,8 +230,14 @@ if __name__ == '__main__':
                     testCmd = '\"{}\" \"{}\"<\"{}\"'.format(pypyPath, sourceCode, d)
                 else:
                     testCmd = 'python \"{}\"<\"{}\"'.format(pypyPath, sourceCode, d)
+            elif language == 'java':
+                if javaPath:
+                    testCmd = '\"{}\" \"{}\"<\"{}\"'.format(javaPath, javaClassFile, d)
+                else:
+                    testCmd = 'java \"{}\"<\"{}\"'.format(javaPath, javaClassFile, d)
             else:
                 raise ValueError('unsupport language')
+            print(testCmd)
             _ = grader(testCmd, d)
             l.append(_)
     res = gen(l)
