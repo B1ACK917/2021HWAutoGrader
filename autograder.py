@@ -111,41 +111,48 @@ def grader(testCmd, ioData):
                 IDInd += 1
         cnt = 0
         for mig in day['migration']:
-            cnt += 1
-            source = mig[0]
-            target = mig[1][0]
-            dayServerInfo[VMIDMap[source]].remove(source)
-            dayServerInfo[target].append(source)
-            VMIDMap[source] = target
-            migTot += 1
-            if cnt >= int(len(VMIDMap) / 200):
-                migOverInfo.append(('migOverflow', day_i + 1, cnt, mig, int(len(VMIDMap) / 200)))
-            if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
-                bombInfo.append(
-                    ('Migration', day_i + 1, cnt, mig, target, serverIDMap[target], serverDict[serverIDMap[target]],
-                     dayServerInfo[target][-5 if len(
-                         dayServerInfo[target]) > 5 else -len(dayServerInfo[target]):]))
+            try:
+                cnt += 1
+                source = mig[0]
+                target = mig[1][0]
+                dayServerInfo[VMIDMap[source]].remove(source)
+                dayServerInfo[target].append(source)
+                VMIDMap[source] = target
+                migTot += 1
+                if cnt >= int(len(VMIDMap) / 200):
+                    migOverInfo.append(('migOverflow', day_i + 1, cnt, mig, int(len(VMIDMap) / 200)))
+                if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
+                    bombInfo.append(
+                        ('Migration', day_i + 1, cnt, mig, target, serverIDMap[target], serverDict[serverIDMap[target]],
+                         dayServerInfo[target][-5 if len(
+                             dayServerInfo[target]) > 5 else -len(dayServerInfo[target]):]))
+            except KeyError:
+                raise RuntimeError(('migration error', mig))
         migHappenTime.append(cnt)
         opInd = 0
         for op in day['operate']:
             if op[0] == 'add':
-                dayServerInfo[day['request'][opInd][0]].append(op[1])
-                VMIDMap[op[1]] = day['request'][opInd][0]
-                VMIDTypeMap[op[1]] = op[2].strip()
-                if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict, VMDict,
-                                  serverIDMap, VMIDTypeMap):
-                    bombInfo.append(('Add', day_i + 1, opInd + 1, op, day['request'][opInd][0],
-                                     serverIDMap[day['request'][opInd][0]],
-                                     serverDict[serverIDMap[day['request'][opInd][0]]],
-                                     dayServerInfo[day['request'][opInd][0]][-5 if len(
-                                         dayServerInfo[day['request'][opInd][0]]) > 5 else -len(
-                                         dayServerInfo[day['request'][opInd][0]]):]))
-                opInd += 1
+                try:
+                    dayServerInfo[day['request'][opInd][0]].append(op[1])
+                    VMIDMap[op[1]] = day['request'][opInd][0]
+                    VMIDTypeMap[op[1]] = op[2].strip()
+                    if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict,
+                                      VMDict,
+                                      serverIDMap, VMIDTypeMap):
+                        bombInfo.append(('Add', day_i + 1, opInd + 1, op, day['request'][opInd][0],
+                                         serverIDMap[day['request'][opInd][0]],
+                                         serverDict[serverIDMap[day['request'][opInd][0]]],
+                                         dayServerInfo[day['request'][opInd][0]][-5 if len(
+                                             dayServerInfo[day['request'][opInd][0]]) > 5 else -len(
+                                             dayServerInfo[day['request'][opInd][0]]):]))
+                    opInd += 1
+                except KeyError:
+                    raise RuntimeError(('server plant error', day['request'][opInd][0], (op[0], op[2], op[1])))
             else:
                 try:
                     dayServerInfo[VMIDMap[op[1]]].remove(op[1])
                 except KeyError:
-                    raise RuntimeError('Trying to del an unexist server')
+                    raise RuntimeError(('server plant error', VMIDMap[op[1]], op))
         fullInfo[day_i].update({'info': copy.deepcopy(dayServerInfo)})
 
     energyCost = []
@@ -245,8 +252,18 @@ if __name__ == '__main__':
                         filePath, javaJARFile, d)
             else:
                 raise ValueError('unsupport language')
-            _ = grader(testCmd, d)
-            l.append(_)
+            try:
+                _ = grader(testCmd, d)
+                l.append(_)
+            except RuntimeError as e:
+                if e.args[0][0] == 'server plant error':
+                    print('服务器或虚拟机信息错误,服务器 ID 不存在')
+                    print('发生错误的服务器ID为{}，你输出的操作为{}'.format(e.args[0][1], e.args[0][2]))
+
+                elif e.args[0][1] == 'migration error':
+                    print('虚拟机迁移错误,服务器 ID 不存在')
+                    print('你输出的操作为{}'.format(e.args[0][1]))
+                print('该问题导致分析器无法继续运行，报告中不会包含本次分析')
     res = gen(l)
 
     sys = platform.system()
