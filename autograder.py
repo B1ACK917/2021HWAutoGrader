@@ -231,7 +231,7 @@ if __name__ == '__main__':
                 if pypyPath:
                     testCmd = '\"{}\" \"{}\"<\"{}\"'.format(pypyPath, sourceCode, d)
                 else:
-                    testCmd = 'python \"{}\"<\"{}\"'.format(pypyPath, sourceCode, d)
+                    testCmd = 'python \"{}\"<\"{}\"'.format(sourceCode, d)
             elif language == 'java':
                 filePath, classPath = os.path.split(javaClassFile)
                 classPath = os.path.splitext(classPath)[0]

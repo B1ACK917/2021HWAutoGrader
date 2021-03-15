@@ -16,6 +16,8 @@
 
 - 0.2.4更新：由于最后生成的报告需要浏览器来查看，Linux下可能无法打开报告，请将目录下生成的最新一份html和resource文件夹拷贝到Windows下使用浏览器打开html文件浏览。
 
+- 0.2.5更新：默认python路径会导致一个bug，现在已经修复，感谢Yjh-Rking的反馈。
+
 **网页不再使用index.html的统一名称，改为当前时间戳，方便保存对比。**
 
 **由于图像使用Matplotlib绘制，在Linux系统下会出现中文文字变成方框的问题，建议在Windows平台运行AutoGrader以获得最佳体验。**
@@ -48,7 +50,7 @@
 
    如果你是Python选手，请在language中填入python，然后在PythonInterpreter中指定解释器，留空则为默认python解释器。在sourceCode字段填入你的python脚本所在路径，并给出程序接收的输入文件。
 
-   如果你是Java选手，请在language中填入java，然后在javaPath中指定java路径，留空则使用默认java解释器。在javaClass字段中填入你已经使用javac编译好的.class文件或者可执行文件，并给出程序接受的输入文件。
+   如果你是Java选手，请在language中填入java，然后在javaPath中指定java路径，留空则使用默认java解释器。在javaClass字段中填入你已经使用javac编译好的.class文件，并给出程序接受的输入文件，请注意，华为提供的模板在开头会有package语句导致路径问题，请在本地运行autoGrader时将其删除，但请不要忘记提交时加上package语句。
 
    **注意：**
 
