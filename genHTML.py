@@ -67,7 +67,7 @@ bombContain = """
                 <th>错误信息</th>
                 <th>错误请求</th>
                 <th>错误服务器ID</th>
-                <th>挂载虚拟机列表(简略)</th>
+                <th>挂载虚拟机列表(仅显示最后5个虚拟机)</th>
               </tr>
               BOMBINNER
             </table>
@@ -96,13 +96,14 @@ def gen(ls, showHeader=False):
                     out.write(line)
                 else:
                     existHeader = False
-                    for (ioName, hardCost, energyCost, timeCost, emptyRate, energyAVG, folder, mig, bombInfo) in ls:
+                    for (ioName, hardCost, energyCost, timeCost, emptyRate, energyAVG, folder, mig, bombInfo,
+                         migOverInfo) in ls:
                         contain = mainContain
                         if showHeader and not existHeader:
                             contain = header.replace('CCCOST', str(sum([k[1] + k[2] for k in ls]))) + contain
                             existHeader = True
                         contain = contain.replace('DOC_NAME', ioName)
-                        contain = contain.replace('ICON_TYPE', 'right' if not bombInfo else 'warning')
+                        contain = contain.replace('ICON_TYPE', 'warning' if bombInfo or migOverInfo else 'right')
                         contain = contain.replace('IMG1', os.path.join(folder, '1.png'))
                         contain = contain.replace('IMG2', os.path.join(folder, '2.png'))
                         contain = contain.replace('IMG3', os.path.join(folder, '3.png'))
@@ -114,16 +115,38 @@ def gen(ls, showHeader=False):
                         contain = contain.replace('EMPTY_RATIO', str(round(emptyRate * 100, 6)) + ' % ')
                         contain = contain.replace('ENERGY_AVG', str(energyAVG))
                         contain = contain.replace('MIG_TIMES', str(mig))
-                        if bombInfo:
+                        if bombInfo or migOverInfo:
                             totalBombInfo = """"""
-                            for b in bombInfo[:50 if len(bombInfo) > 50 else len(bombInfo)]:
-                                bs = bombStyle
-                                bs = bs.replace('BOMB_TYPE', '资源分配溢出')
-                                bs = bs.replace('BOMB_INFO', '发生于第{}天的第{}条{}操作'.format(b[1], b[2], b[0]))
-                                bs = bs.replace('BOMB_REQ', '({},{},{})'.format(b[3][0], b[3][2], b[3][1]))
-                                bs = bs.replace('BOMB_SERVER_ID', '{} ({},{})'.format(b[4], b[5], b[6]))
-                                bs = bs.replace('BOMB_SERVER_VM', '{}'.format(b[7]))
-                                totalBombInfo += bs
+                            if migOverInfo:
+                                for b in migOverInfo[:10 if len(migOverInfo) > 10 else len(migOverInfo)]:
+                                    bs = bombStyle
+                                    bs = bs.replace('BOMB_TYPE', '虚拟机迁移超过上限')
+                                    bs = bs.replace('BOMB_INFO',
+                                                    '发生于第{}天的第{}条迁移操作，允许迁移次数最大为{}'.format(b[1], b[2], b[4]))
+                                    if b[3][1][1]:
+                                        bs = bs.replace('BOMB_REQ',
+                                                        '({},{},{})'.format(b[3][0], b[3][1][0], b[3][1][1]))
+                                    else:
+                                        bs = bs.replace('BOMB_REQ', '({},{})'.format(b[3][0], b[3][1][0]))
+                                    bs = bs.replace('BOMB_SERVER_ID', '')
+                                    bs = bs.replace('BOMB_SERVER_VM', '')
+                                    totalBombInfo += bs
+                            if bombInfo:
+                                for b in bombInfo[:50 if len(bombInfo) > 50 else len(bombInfo)]:
+                                    bs = bombStyle
+                                    bs = bs.replace('BOMB_TYPE', '资源分配溢出')
+                                    bs = bs.replace('BOMB_INFO', '发生于第{}天的第{}条{}操作'.format(b[1], b[2], b[0]))
+                                    if b[3][0] == 'add':
+                                        bs = bs.replace('BOMB_REQ', '({},{},{})'.format(b[3][0], b[3][2], b[3][1]))
+                                    else:
+                                        if b[3][1][1]:
+                                            bs = bs.replace('BOMB_REQ',
+                                                            '({},{},{})'.format(b[3][0], b[3][1][0], b[3][1][1]))
+                                        else:
+                                            bs = bs.replace('BOMB_REQ', '({},{})'.format(b[3][0], b[3][1][0]))
+                                    bs = bs.replace('BOMB_SERVER_ID', '{} ({},{})'.format(b[4], b[5], b[6]))
+                                    bs = bs.replace('BOMB_SERVER_VM', '{}'.format(b[7]))
+                                    totalBombInfo += bs
                             bc = bombContain.replace('BOMBINNER', totalBombInfo)
                             contain = contain.replace('BOMBINFO', bc)
                         else:

@@ -101,6 +101,7 @@ def grader(testCmd, ioData):
     migTot = 0
     migHappenTime = []
     bombInfo = []
+    migOverInfo = []
     for day_i in range(len(fullInfo)):
         day = fullInfo[day_i]
         for server in day['purchase']:
@@ -117,6 +118,8 @@ def grader(testCmd, ioData):
             dayServerInfo[target].append(source)
             VMIDMap[source] = target
             migTot += 1
+            if cnt >= int(len(VMIDMap) / 200):
+                migOverInfo.append(('migOverflow', day_i + 1, cnt, mig, int(len(VMIDMap) / 200)))
             if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
                 bombInfo.append(
                     ('Migration', day_i + 1, cnt, mig, target, serverIDMap[target], serverDict[serverIDMap[target]],
@@ -176,7 +179,7 @@ def grader(testCmd, ioData):
     plt.plot(range(len(fullInfo)), emptyRate, label='Empty Ratio')
     plt.xlabel('Days')
     plt.ylabel('Ratio')
-    plt.title('闲置率')
+    plt.title('Empty Ratio (How many servers are not in use)')
     plt.legend()
     plt.savefig(os.path.join(folderName, '1.png'))
     plt.clf()
@@ -184,7 +187,7 @@ def grader(testCmd, ioData):
     plt.plot(range(len(fullInfo)), energyCost, label='Energy Cost')
     plt.xlabel('Days')
     plt.ylabel('Money')
-    plt.title('运行成本')
+    plt.title('Energy Cost (When a server is in use, it leads to energy cost)')
     plt.legend()
     plt.savefig(os.path.join(folderName, '2.png'))
     plt.clf()
@@ -192,7 +195,7 @@ def grader(testCmd, ioData):
     plt.plot(range(len(fullInfo)), migHappenTime, label='Migration Times')
     plt.xlabel('Days')
     plt.ylabel('Times')
-    plt.title('迁移次数')
+    plt.title('Migration Times')
     plt.legend()
     plt.savefig(os.path.join(folderName, '3.png'))
     plt.clf()
@@ -200,12 +203,12 @@ def grader(testCmd, ioData):
     labels = ['{}\n{}cpu\n{}mem'.format(s, serverDict[s]['cpu'], serverDict[s]['memory']) for s in serverNums.keys()]
     sizes = list(serverNums.values())
     plt.pie(sizes, labels=labels, autopct='%1.2f%%')
-    plt.title('服务器占比')
+    plt.title('Server Types')
     plt.savefig(os.path.join(folderName, '4.png'))
     plt.clf()
 
     return os.path.split(ioData)[-1], hardCost, sum(energyCost), endTime - beginTime, sum(emptyRate) / len(
-        emptyRate), sum(energyCost) / len(energyCost), folderName, migTot, bombInfo
+        emptyRate), sum(energyCost) / len(energyCost), folderName, migTot, bombInfo, migOverInfo
 
 
 if __name__ == '__main__':
@@ -219,10 +222,10 @@ if __name__ == '__main__':
         exe = config['executable']
         sourceCode = config['sourceCode']
         javaPath = config['javaPath']
-        javaClassFile = config['javaClass']
+        javaJARFile = config['buildJARPath']
         ioDataList = config['ioData']
         print('AutoGrader Running with args: {}'.format(
-            [language, pypyPath, exe, sourceCode, javaPath, javaClassFile, ioDataList]))
+            [language, pypyPath, exe, sourceCode, javaPath, javaJARFile, ioDataList]))
 
         for d in tqdm(ioDataList, ncols=40):
             if language == 'c' or language == 'c++':
@@ -233,12 +236,13 @@ if __name__ == '__main__':
                 else:
                     testCmd = 'python \"{}\"<\"{}\"'.format(sourceCode, d)
             elif language == 'java':
-                filePath, classPath = os.path.split(javaClassFile)
-                classPath = os.path.splitext(classPath)[0]
+                filePath, JARPath = os.path.split(javaJARFile)
                 if javaPath:
-                    testCmd = '\"{}\" -cp \"{}\" \"{}\"<\"{}\"'.format(javaPath, filePath, classPath, d)
+                    testCmd = '\"{}\" -Djava.library.path=\"{}\" -classpath \"{}\" \"com.huawei.java.main.Main\"<\"{}\"'.format(
+                        javaPath, filePath, javaJARFile, d)
                 else:
-                    testCmd = 'java -cp \"{}\" \"{}\"<\"{}\"'.format(filePath, classPath, d)
+                    testCmd = 'java -Djava.library.path=\"{}\" -classpath \"{}\" \"com.huawei.java.main.Main\"<\"{}\"'.format(
+                        filePath, javaJARFile, d)
             else:
                 raise ValueError('unsupport language')
             _ = grader(testCmd, d)
@@ -250,5 +254,7 @@ if __name__ == '__main__':
         os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
     elif sys == 'Linux':
         os.popen('google-chrome {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
-        print('你正在使用Linux系统，可能无法打开网页报错，请尝试把目录下最新生成的html和resource拷贝到Windows下查看\n'
-              '由于图像使用Matplotlib绘制，在Linux系统下会出现中文文字变成方框的问题，建议在Windows平台运行AutoGrader以获得最佳体验。')
+        print('你正在使用Linux系统，可能无法打开网页或报错，请尝试用默认浏览器打开目录下最新生成的html或者将html和resource拷贝到Windows下查看\n')
+    elif sys == 'Darwin':
+        os.popen('open -a Safari {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
+        print('你正在使用Mac系统，可能无法打开网页或报错，请尝试用默认浏览器打开目录下最新生成的html或者将html和resource拷贝到Windows下查看\n')

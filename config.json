@@ -4,6 +4,6 @@
   "executable": "",
   "sourceCode": "",
   "javaPath": "",
-  "javaClass": "",
+  "buildJARPath": "",
   "ioData": ["./data/training-1.txt", "./data/training-2.txt"]
 }
