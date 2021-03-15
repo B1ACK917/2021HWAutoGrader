@@ -5,6 +5,7 @@ import time
 import copy
 import matplotlib.pyplot as plt
 from genHTML import gen
+import platform
 
 
 def check_bomb(server, VMList, serverDict, VMDict, serverIDMap, VMIDMap):
@@ -244,4 +245,10 @@ if __name__ == '__main__':
             l.append(_)
     res = gen(l)
 
-    os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
+    sys = platform.system()
+    if sys == 'Windows':
+        os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
+    elif sys == 'Linux':
+        os.popen('google-chrome {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
+        print('你正在使用Linux系统，可能无法打开网页报错，请尝试把目录下最新生成的html和resource拷贝到Windows下查看\n'
+              '由于图像使用Matplotlib绘制，在Linux系统下会出现中文文字变成方框的问题，建议在Windows平台运行AutoGrader以获得最佳体验。')
