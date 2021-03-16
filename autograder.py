@@ -52,7 +52,7 @@ def grader(testCmd, ioData):
 
     beginTime = time.perf_counter()
     result = os.popen(testCmd)
-    result = result.read().split('\n')[:-1]
+    result = result.read().strip().split('\n')
     endTime = time.perf_counter()
     fullInfo = []
     for i in range(len(result)):
@@ -148,6 +148,8 @@ def grader(testCmd, ioData):
                     opInd += 1
                 except KeyError:
                     raise RuntimeError(('server plant error', day['request'][opInd][0], (op[0], op[2], op[1])))
+                except IndexError:
+                    raise RuntimeError(('req error', (op[0], op[2], op[1])))
             else:
                 try:
                     dayServerInfo[VMIDMap[op[1]]].remove(op[1])
@@ -260,18 +262,22 @@ if __name__ == '__main__':
                     print('服务器或虚拟机信息错误,服务器 ID 不存在')
                     print('发生错误的服务器ID为{}，你输出的操作为{}'.format(e.args[0][1], e.args[0][2]))
 
-                elif e.args[0][1] == 'migration error':
+                elif e.args[0][0] == 'migration error':
                     print('虚拟机迁移错误,服务器 ID 不存在')
-                    print('你输出的操作为{}'.format(e.args[0][1]))
+                    print('你输出的操作为{}'.format(e.args[0][2]))
+
+                elif e.args[0][0] == 'req error':
+                    print('请求错误')
+                    print('找不到和{}对应的服务器部署操作'.format(e.args[0][2]))
                 print('该问题导致分析器无法继续运行，报告中不会包含本次分析')
     res = gen(l)
 
     sys = platform.system()
-    if sys == 'Windows':
+    if sys == 'Windows' or sys == 'windows':
         os.popen('start chrome.exe {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
-    elif sys == 'Linux':
+    elif sys == 'Linux' or sys == 'linux':
         os.popen('google-chrome {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
         print('你正在使用Linux系统，可能无法打开网页或报错，请尝试用默认浏览器打开目录下最新生成的html或者将html和resource拷贝到Windows下查看\n')
-    elif sys == 'Darwin':
+    elif sys == 'Darwin' or sys == 'darwin':
         os.popen('open -a Safari {}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)), res)))
         print('你正在使用Mac系统，可能无法打开网页或报错，请尝试用默认浏览器打开目录下最新生成的html或者将html和resource拷贝到Windows下查看\n')
