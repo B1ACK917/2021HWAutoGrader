@@ -119,7 +119,7 @@ def grader(testCmd, ioData):
                 dayServerInfo[target].append(source)
                 VMIDMap[source] = target
                 migTot += 1
-                if cnt >= int(len(VMIDMap) / 200):
+                if cnt > int(len(VMIDMap) / 200):
                     migOverInfo.append(('migOverflow', day_i + 1, cnt, mig, int(len(VMIDMap) / 200)))
                 if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
                     bombInfo.append(
