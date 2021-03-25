@@ -8,17 +8,31 @@ from genHTML import gen
 import platform
 
 
-def check_bomb(server, VMList, serverDict, VMDict, serverIDMap, VMIDMap):
+
+def check_bomb(server, VMList, serverDict, VMDict, serverIDMap, VMIDMap,vmid2node):
     serverCPU, serverMEM = serverDict[serverIDMap[server]]['cpu'], serverDict[serverIDMap[server]]['memory']
+    serverCPU_A, serverMEM_A = serverCPU/2, serverMEM/2
+    serverCPU_B, serverMEM_B = serverCPU/2, serverMEM /2
     for VM in VMList:
-        serverCPU -= VMDict[VMIDMap[VM]]['cpu']
-        serverMEM -= VMDict[VMIDMap[VM]]['memory']
-        if serverCPU < 0 or serverMEM < 0:
+        node=vmid2node[VM]
+        if node=='A':
+            serverCPU_A -= VMDict[VMIDMap[VM]]['cpu']
+            serverMEM_A -= VMDict[VMIDMap[VM]]['memory']
+        elif node=='B':
+            serverCPU_B -= VMDict[VMIDMap[VM]]['cpu']
+            serverMEM_B -= VMDict[VMIDMap[VM]]['memory']
+        elif node==None:
+            serverCPU_A -= VMDict[VMIDMap[VM]]['cpu']/2
+            serverMEM_A -= VMDict[VMIDMap[VM]]['memory']/2
+            serverCPU_B -= VMDict[VMIDMap[VM]]['cpu']/2
+            serverMEM_B -= VMDict[VMIDMap[VM]]['memory']/2
+        if serverCPU_A < 0 or serverMEM_A < 0 or serverCPU_B < 0 or serverMEM_B < 0:
             return False
     return True
 
 
 def grader(testCmd, ioData):
+    vmid2node={}
     serverDict = {}
     VMDict = {}
     with open(ioData) as file:
@@ -115,13 +129,14 @@ def grader(testCmd, ioData):
                 cnt += 1
                 source = mig[0]
                 target = mig[1][0]
+                vmid2node[source]=mig[1][1]
                 dayServerInfo[VMIDMap[source]].remove(source)
                 dayServerInfo[target].append(source)
                 VMIDMap[source] = target
                 migTot += 1
                 if cnt > int(len(VMIDMap) / 200):
                     migOverInfo.append(('migOverflow', day_i + 1, cnt, mig, int(len(VMIDMap) / 200)))
-                if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap):
+                if not check_bomb(target, dayServerInfo[target], serverDict, VMDict, serverIDMap, VMIDTypeMap,vmid2node):
                     bombInfo.append(
                         ('Migration', day_i + 1, cnt, mig, target, serverIDMap[target], serverDict[serverIDMap[target]],
                          dayServerInfo[target][-5 if len(
@@ -135,10 +150,9 @@ def grader(testCmd, ioData):
                 try:
                     dayServerInfo[day['request'][opInd][0]].append(op[1])
                     VMIDMap[op[1]] = day['request'][opInd][0]
+                    vmid2node[op[1]]=day['request'][opInd][1]
                     VMIDTypeMap[op[1]] = op[2].strip()
-                    if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict,
-                                      VMDict,
-                                      serverIDMap, VMIDTypeMap):
+                    if not check_bomb(day['request'][opInd][0], dayServerInfo[day['request'][opInd][0]], serverDict,VMDict,serverIDMap, VMIDTypeMap,vmid2node):
                         bombInfo.append(('Add', day_i + 1, opInd + 1, op, day['request'][opInd][0],
                                          serverIDMap[day['request'][opInd][0]],
                                          serverDict[serverIDMap[day['request'][opInd][0]]],
@@ -151,10 +165,12 @@ def grader(testCmd, ioData):
                 except IndexError:
                     raise RuntimeError(('req error', (op[0], op[2], op[1])))
             else:
-                try:
-                    dayServerInfo[VMIDMap[op[1]]].remove(op[1])
-                except KeyError:
-                    raise RuntimeError(('server plant error', VMIDMap[op[1]], op))
+                dayServerInfo[VMIDMap[op[1]]].remove(op[1])
+                vmid2node[op[1]]='del'
+                # try:
+                #
+                # except KeyError:
+                #     raise RuntimeError(('server plant error', VMIDMap[op[1]], op))
         fullInfo[day_i].update({'info': copy.deepcopy(dayServerInfo)})
 
     energyCost = []
